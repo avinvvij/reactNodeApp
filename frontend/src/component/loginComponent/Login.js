@@ -1,5 +1,5 @@
 //Imports
-import React, { useState,useContext} from 'react';
+import React, { useState, useContext } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -19,46 +19,47 @@ import LoginService from '../../service/LoginService'
 import LoginStyle from '../../style/LoginStyle'
 
 //Context
-import {UserContext} from '../../context/UserContextManagement'
+import { UserContext } from '../../context/UserContextManagement'
 
 function Login() {
   const classes = LoginStyle();
 
   //Initialize State
-const [usrnm, setUsrnm] = useState("");
-const [pwd, setPwd] = useState("");
+  const [usrnm, setUsrnm] = useState("");
+  const [pwd, setPwd] = useState("");
 
 
 
-//Use Context
-const {usernm, setUsernm} = useContext(UserContext);
+  //Use Context
+  const context = useContext(UserContext);
 
-//To update Context
-React.useEffect(() => {
-  setUsernm(usrnm);   
-},[usrnm,setUsernm]);
+  //To update Context
+  React.useEffect(() => {
+    console.log(context);
+    context?.setUsernm(usrnm);
+  }, [usrnm]);
 
-//On click Submit Event
-const handleSubmit = (e) => {
-  e.preventDefault();
-  if (LoginService.UserInValidate(usrnm,pwd)) {//Validate User
-    window.alert("Please Enter Username and Password");
+  //On click Submit Event
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (LoginService.UserInValidate(usrnm, pwd)) {//Validate User
+      window.alert("Please Enter Username and Password");
+    }
+    else {
+      //Authenticate User
+      LoginService.UserAuthRequest(usrnm, pwd).then(function (response) {
+        let result = JSON.parse(response);
+        if (result.status === 1) {
+          context.setUsernm(usrnm);   //Updating Context
+          console.log(usrnm);
+          window.location = '/dashboard';
+        }
+        else {
+          window.alert(result.msg);
+        }
+      });
+    }
   }
-  else {
-    //Authenticate User
-    LoginService.UserAuthRequest(usrnm,pwd).then(function(response) {
-      let result=JSON.parse(response);
-      if (result.status === 1) {
-        setUsernm(usrnm);   //Updating Context
-        console.log(usrnm);
-        window.location='/dashboard';
-     }
-     else {
-         window.alert(result.msg);
-     }
-    }); 
-  }
-}
 
 
 
@@ -83,7 +84,7 @@ const handleSubmit = (e) => {
             name="username"
             autoComplete="username"
             autoFocus
-            onChange={e =>setUsrnm(e.target.value)} 
+            onChange={e => setUsrnm(e.target.value)}
           />
           <TextField
             variant="outlined"
@@ -95,7 +96,7 @@ const handleSubmit = (e) => {
             type="password"
             id="password"
             autoComplete="current-password"
-            onChange={e =>setPwd(e.target.value)}
+            onChange={e => setPwd(e.target.value)}
           />
           <Button
             type="submit"
